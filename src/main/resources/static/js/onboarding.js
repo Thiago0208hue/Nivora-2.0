@@ -143,10 +143,11 @@
   });
 
   async function finalizar() {
-    const prioridades = NivoraPriorities.calcular(state.curso, state.dificuldades, state.nivel, state.tempoMin);
     btnAvancar.disabled = true;
+    let recomendacao;
     try {
       await NivoraPerfil.salvar(state);
+      recomendacao = await NivoraPerfil.prioridades();
     } catch (e) {
       mostrarErro(e.message);
       btnAvancar.disabled = false;
@@ -161,17 +162,17 @@
     document.getElementById('resultadoResumo').innerHTML = `
       <p>🎓 <strong>Curso:</strong> ${esc(state.curso.nome)}</p>
       <p>🏫 <strong>Faculdade:</strong> ${esc(state.faculdade.nome)}</p>
-      <p>🎯 <strong>Forma de ingresso:</strong> ${state.ingresso}</p>
+      <p>🎯 <strong>Forma de ingresso:</strong> ${esc(state.ingresso)}</p>
       <p>⏱️ <strong>Tempo diário:</strong> ${state.tempoEstudo}</p>
       <p>📈 <strong>Nível:</strong> ${state.nivel}</p>
     `;
-    const ordem = Object.values(prioridades).sort((a, b) => b.score - a.score);
+    const ordem = Object.values(recomendacao.prioridades).sort((a, b) => b.score - a.score);
     document.getElementById('resultadoPrioridades').innerHTML = ordem.map(p => `
       <div class="prioridade-item">
         <span>${p.cor} ${p.label} — ${p.nivel}</span>
-        <p class="hint">${p.motivo}</p>
+        ${p.motivos.map(m => `<p class="hint">${esc(m)}</p>`).join('')}
       </div>
-    `).join('');
+    `).join('') + NivoraPerfil.htmlAvisos(recomendacao.avisos);
 
     getStepEl('resultado').hidden = false;
   }

@@ -54,6 +54,28 @@ const NivoraPerfil = {
     return this.carregar();
   },
 
+  // Prioridades calculadas pelo servidor (POST /api/personalizacao/prioridades).
+  // Devolve as áreas no formato usado pelas telas: { matematica: { label, score, nivel, cor, motivos, ... } }
+  async prioridades(desempenhoPorArea = {}) {
+    const resposta = await NivoraApi.post('/api/personalizacao/prioridades', { desempenho: desempenhoPorArea });
+    const rotulos = { ALTA: 'Alta', MEDIA: 'Média', BAIXA: 'Baixa' };
+    const cores = { ALTA: '🔴', MEDIA: '🟡', BAIXA: '🟢' };
+    const porArea = {};
+    resposta.prioridades.forEach(p => {
+      porArea[p.area] = {
+        label: p.rotulo, score: p.score, peso: p.peso, origemPeso: p.origemPeso,
+        nivel: rotulos[p.nivel], cor: cores[p.nivel],
+        motivos: p.motivos, motivo: p.motivos.join(' ')
+      };
+    });
+    return { prioridades: porArea, avisos: resposta.avisos, notaCorte: resposta.notaCorte };
+  },
+
+  htmlAvisos(avisos) {
+    if (!avisos || !avisos.length) return '';
+    return `<div class="resultado-card" style="margin-top:16px;">${avisos.map(a => `<p class="hint">${NivoraApi.escapar(a)}</p>`).join('')}</div>`;
+  },
+
   // Temporário: as telas Plano, Assuntos, Treinar etc. ainda leem o perfil do localStorage.
   // Esta cópia some quando elas forem ligadas à API (etapas 5 a 9).
   guardarCopia(perfil) {

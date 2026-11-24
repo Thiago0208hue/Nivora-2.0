@@ -30,7 +30,8 @@
   ) / 3);
 
   const desempenhoPorArea = NivoraPriorities.agregarDesempenhoPorArea(desempenho, NivoraData.assuntos || []);
-  const prioridadesAtuais = NivoraPriorities.calcular(perfil.curso, perfil.dificuldades, perfil.nivel, perfil.tempoMin, desempenhoPorArea);
+  const recomendacao = await NivoraPerfil.prioridades(desempenhoPorArea);
+  const prioridadesAtuais = recomendacao.prioridades;
   const ordem = Object.values(prioridadesAtuais).sort((a, b) => b.score - a.score);
   const gam = NivoraGamification.verificarConquistas();
   const nivel = NivoraGamification.nivel(gam.xp);
@@ -63,10 +64,11 @@
       ${ordem.map(p => `
         <div class="prioridade-item">
           <span>${p.cor} ${p.label} — ${p.nivel}</span>
-          <p class="hint">${p.motivo}</p>
+          ${p.motivos.map(m => `<p class="hint">${esc(m)}</p>`).join('')}
         </div>
       `).join('')}
     </div>
+    ${NivoraPerfil.htmlAvisos(recomendacao.avisos)}
 
     <h2 class="section-title" style="margin-top:40px;">Conquistas</h2>
     <div class="metas-lista">

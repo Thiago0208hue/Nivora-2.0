@@ -1,5 +1,6 @@
 // plano.js — Etapa 3: Meu Plano (cronograma automático, readapta com o desempenho)
 (async function () {
+  await NivoraApi.exigirLogin();
   const app = document.getElementById('planoApp');
   const perfil = NivoraStorage.get(NivoraStorage.KEYS.PERFIL);
 
@@ -15,7 +16,7 @@
   await NivoraData.carregar();
   const desempenho = NivoraStorage.get(NivoraStorage.KEYS.DESEMPENHO, {});
   const desempenhoPorArea = NivoraPriorities.agregarDesempenhoPorArea(desempenho, NivoraData.assuntos || []);
-  const prioridadesAtuais = NivoraPriorities.calcular(perfil.curso, perfil.dificuldades, perfil.nivel, perfil.tempoMin, desempenhoPorArea);
+  const prioridadesAtuais = (await NivoraPerfil.prioridades(desempenhoPorArea)).prioridades;
 
   function formatMin(min) {
     if (min >= 60) {

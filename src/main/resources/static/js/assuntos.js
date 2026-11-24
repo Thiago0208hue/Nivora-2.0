@@ -20,7 +20,11 @@
     await NivoraData.carregar();
     if (perfil) {
       const desempenhoPorArea = NivoraPriorities.agregarDesempenhoPorArea(desempenho, NivoraData.assuntos || []);
-      prioridades = NivoraPriorities.calcular(perfil.curso, perfil.dificuldades, perfil.nivel, perfil.tempoMin, desempenhoPorArea);
+      try {
+        prioridades = (await NivoraPerfil.prioridades(desempenhoPorArea)).prioridades;
+      } catch {
+        prioridades = null; // sem login ou servidor indisponível: a tela funciona sem as cores de prioridade
+      }
     }
     app.innerHTML = `
       <h1 class="section-title">Assuntos do ENEM</h1>
