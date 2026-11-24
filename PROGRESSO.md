@@ -1,11 +1,20 @@
 # PROGRESSO — Nivora 2.0
 
 ## Etapa atual
-Etapa 3 — Autenticação e segurança (**escrita, NÃO testada**).
+Etapa 4 — Frontend e onboarding (**escrita, NÃO testada**).
 
 ## Concluídas
 - Etapa 0 — Auditoria (doc "Nivora 2.0 — Etapa 0: Diagnóstico").
 - Etapa 1 — Preparação do backend (validada pelo usuário: `./mvnw test`).
+
+## Etapa 4: alterações (não testadas)
+- Frontend original copiado para `src/main/resources/static/` (`index.html`, `pages/`, `css/`, `js/`, `data/`, `assets/`) com caminhos absolutos (`/css/...`, `/pages/...`).
+- Novas telas: `pages/login.html` e `pages/cadastro.html` (+ `login.js`, `cadastro.js`).
+- `js/api.js`: fetch com cookie de sessão e token CSRF, `exigirLogin`, `sair`, `escapar` (anti-XSS).
+- `js/perfil.js`: perfil via API (`GET/PUT /api/perfil`) e catálogo (`/api/cursos`, `/api/instituicoes`).
+- Ligados à API: onboarding (grava no MySQL), dashboard, configurações, página inicial (botões mudam se logado), logout.
+- Backend: `V2__perfil_ingresso_meta.sql` (colunas `forma_ingresso` e `meta`), `CursoController/Service/Response`, `InstituicaoController/Service/Response`, campos novos em `PerfilEstudo/Request/Response`.
+- Testes: `FrontendTest` (arquivos estáticos), mais um caso em `AutenticacaoTest` (catálogo).
 
 ## Etapa 3: alterações (não testadas)
 - `pom.xml`: `spring-boot-starter-security` e `-security-test`.
@@ -35,6 +44,12 @@ Etapa 3 — Autenticação e segurança (**escrita, NÃO testada**).
 - Se `validate` reclamar de tipo de coluna, ajustar a entidade ou a migração (primeiro ponto a conferir).
 - Se `springSecurity()`/MockMvc ou nomes de starters do Boot 4 falharem na compilação, ajustar import/dependência (pontos de maior risco da Etapa 3).
 - Painel admin (papel ADMIN) ainda não existe; só o papel ESTUDANTE.
+- Temporário: `priorities.js` (cálculo de prioridades) ainda roda no navegador; vai para o backend na Etapa 5.
+- Temporário: Plano, Assuntos, Treinar, Desempenho, Redação, Metas e Objetivo ainda usam localStorage; `perfil.js` guarda uma cópia do perfil lá para elas funcionarem. Progresso local é apagado ao sair.
+- Páginas internas são servidas sem login (o JS redireciona); os dados estão protegidos na API.
+- Fontes do Google Fonts ainda carregadas de terceiros (LGPD): resolver nas etapas 10/11 (hospedar localmente).
+- Onboarding refeito não pré-preenche as respostas anteriores.
+- Falta exclusão de conta (LGPD).
 
 ## Decisões técnicas
 - H2 só nos testes; MySQL real em desenvolvimento/produção.
@@ -43,3 +58,5 @@ Etapa 3 — Autenticação e segurança (**escrita, NÃO testada**).
 - Enums gravados como texto (`@JdbcTypeCode(VARCHAR)`) para evitar tipo ENUM nativo do MySQL.
 - Autenticação por sessão (JSESSIONID) com CSRF por cookie; login manual no AuthController para devolver JSON em vez de redirecionar.
 - Senha mínima de 8 e máxima de 72 caracteres (limite do BCrypt); e-mail normalizado em minúsculas.
+- Frontend e API na mesma origem: sem CORS; páginas em `/pages/`, caminhos absolutos.
+- Perfil guarda `formaIngresso` (SISU/ProUni...) e `modalidadeIngresso` (ampla concorrência/escola pública...) em campos separados, como no onboarding original.

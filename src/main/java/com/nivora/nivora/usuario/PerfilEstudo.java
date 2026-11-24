@@ -45,8 +45,14 @@ public class PerfilEstudo {
     @JoinColumn(name = "instituicao_id")
     private Instituicao instituicao;
 
+    @Column(name = "forma_ingresso", length = 40)
+    private String formaIngresso;
+
     @Column(name = "modalidade_ingresso", length = 80)
     private String modalidadeIngresso;
+
+    @Column(length = 60)
+    private String meta;
 
     @Column(name = "nota_pretendida", precision = 6, scale = 2)
     private BigDecimal notaPretendida;
@@ -83,6 +89,12 @@ public class PerfilEstudo {
 
     public Instituicao getInstituicao() { return instituicao; }
     public void setInstituicao(Instituicao instituicao) { this.instituicao = instituicao; }
+
+    public String getFormaIngresso() { return formaIngresso; }
+    public void setFormaIngresso(String formaIngresso) { this.formaIngresso = formaIngresso; }
+
+    public String getMeta() { return meta; }
+    public void setMeta(String meta) { this.meta = meta; }
 
     public String getModalidadeIngresso() { return modalidadeIngresso; }
     public void setModalidadeIngresso(String modalidadeIngresso) { this.modalidadeIngresso = modalidadeIngresso; }

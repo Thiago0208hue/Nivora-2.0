@@ -12,7 +12,9 @@ import java.util.Set;
 public record PerfilRequest(
         @Size(max = 40) String cursoCodigo,
         @Size(max = 30) String instituicaoSigla,
+        @Size(max = 40) String formaIngresso,
         @Size(max = 80) String modalidadeIngresso,
+        @Size(max = 60) String meta,
         @DecimalMin("0") @DecimalMax("1000") BigDecimal notaPretendida,
         Nivel nivel,
         @Min(15) @Max(720) Integer minutosDiarios,

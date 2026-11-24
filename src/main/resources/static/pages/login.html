@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Entrar — Nivora</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container header-inner">
+    <a href="/" class="logo">Nivora</a>
+    <button id="themeToggle" class="icon-btn" aria-label="Alternar tema claro/escuro">🌙</button>
+  </div>
+</header>
+
+<main class="container page">
+  <div class="auth-card">
+    <h1 class="section-title">Entrar no Nivora</h1>
+    <form id="formLogin" novalidate>
+      <label class="form-campo">E-mail
+        <input type="email" name="email" class="search-input" autocomplete="email" required>
+      </label>
+      <label class="form-campo">Senha
+        <input type="password" name="senha" class="search-input" autocomplete="current-password" required>
+      </label>
+      <p class="form-erro" id="erro" role="alert" hidden></p>
+      <button type="submit" class="btn btn-primary" id="btnEntrar">Entrar</button>
+    </form>
+    <p class="auth-troca">Ainda não tem conta? <a href="/pages/cadastro.html">Criar conta</a></p>
+  </div>
+</main>
+
+<script src="/js/storage.js"></script>
+<script src="/js/api.js"></script>
+<script src="/js/app.js"></script>
+<script src="/js/login.js"></script>
+</body>
+</html>

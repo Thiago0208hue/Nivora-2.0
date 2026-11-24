@@ -34,7 +34,9 @@ public class PerfilService {
         perfil.setInstituicao(pedido.instituicaoSigla() == null ? null : instituicoes.findBySigla(pedido.instituicaoSigla())
                 .orElseThrow(() -> new NegocioException(HttpStatus.NOT_FOUND, "Instituição não encontrada.")));
 
+        perfil.setFormaIngresso(pedido.formaIngresso());
         perfil.setModalidadeIngresso(pedido.modalidadeIngresso());
+        perfil.setMeta(pedido.meta());
         perfil.setNotaPretendida(pedido.notaPretendida());
         perfil.setNivel(pedido.nivel());
         perfil.setMinutosDiarios(pedido.minutosDiarios());

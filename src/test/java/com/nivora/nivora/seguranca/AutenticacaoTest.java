@@ -114,11 +114,14 @@ class AutenticacaoTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                         {"cursoCodigo":"medicina","instituicaoSigla":"ufrn","nivel":"INICIANTE",
+                         "formaIngresso":"SISU","meta":"Passar no curso desejado",
                          "minutosDiarios":120,"dificuldades":["Matemática","Física"],
                          "onboardingConcluido":true}"""))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.cursoCodigo").value("medicina"))
                 .andExpect(jsonPath("$.instituicaoSigla").value("ufrn"))
+                .andExpect(jsonPath("$.formaIngresso").value("SISU"))
+                .andExpect(jsonPath("$.meta").value("Passar no curso desejado"))
                 .andExpect(jsonPath("$.dificuldades.length()").value(2));
     }
 
@@ -130,6 +133,21 @@ class AutenticacaoTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"cursoCodigo\":\"nao-existe\"}"))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void catalogoExigeLoginEListaCursosEInstituicoes() throws Exception {
+        mvc.perform(get("/api/cursos")).andExpect(status().isUnauthorized());
+
+        cadastrar();
+        MockHttpSession sessao = logar();
+        mvc.perform(get("/api/cursos").session(sessao))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(14))
+                .andExpect(jsonPath("$[0].pesos.matematica").exists());
+        mvc.perform(get("/api/instituicoes").session(sessao))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(10));
     }
 
     @Test
