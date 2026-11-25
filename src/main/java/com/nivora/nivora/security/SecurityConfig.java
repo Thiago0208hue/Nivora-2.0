@@ -43,6 +43,7 @@ public class SecurityConfig {
                     .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler()))
             .authorizeHttpRequests(auth -> auth
                     .requestMatchers("/api/auth/cadastro", "/api/auth/login", "/api/auth/csrf").permitAll()
+                    .requestMatchers("/api/admin/**").hasRole("ADMIN")
                     .requestMatchers("/api/**").authenticated()
                     .anyRequest().permitAll())
             // API devolve 401 em vez de redirecionar para uma página de login

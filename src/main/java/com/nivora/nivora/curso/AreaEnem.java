@@ -19,6 +19,16 @@ public enum AreaEnem {
         return rotulo;
     }
 
+    /** Aceita a chave em minúsculas ou maiúsculas (matematica, MATEMATICA). */
+    public static Optional<AreaEnem> daChave(String chave) {
+        if (chave == null || chave.isBlank()) return Optional.empty();
+        try {
+            return Optional.of(valueOf(chave.trim().toUpperCase()));
+        } catch (IllegalArgumentException e) {
+            return Optional.empty();
+        }
+    }
+
     /** Área do ENEM a que uma disciplina pertence (as mesmas do formulário de onboarding). */
     public static Optional<AreaEnem> daDisciplina(String disciplina) {
         return switch (disciplina) {

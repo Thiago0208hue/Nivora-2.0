@@ -1,11 +1,23 @@
 # PROGRESSO — Nivora 2.0
 
 ## Etapa atual
-Etapa 6 — Gerador de plano semanal (**escrita, NÃO testada**).
+Etapa 7 — Questões e simulados (**escrita, NÃO testada**; Etapas 2–6 também aguardam `./mvnw test`).
 
 ## Concluídas
 - Etapa 0 — Auditoria (doc "Nivora 2.0 — Etapa 0: Diagnóstico").
 - Etapa 1 — Preparação do backend (validada pelo usuário: `./mvnw test`).
+- Etapas 2 a 6 — escritas, aguardando teste do usuário.
+
+## Etapa 7: alterações (não testadas)
+- Migrações: `V3__papel_usuario.sql` (coluna `papel`), `V4__questoes.sql` (questao, alternativa, simulado, simulado_questao, resposta_questao), `V5__questoes_exemplo.sql` (8 questões de EXEMPLO, origem marcada como não oficial).
+- Pacote `questao/`: entidades, repositórios, `SeletorDeQuestoes` (Fisher-Yates + controle de repetição: nunca respondidas primeiro, depois as respondidas há mais tempo), `QuestaoService`, `SimuladoService`, `QuestaoAdminService`, controllers `/api/questoes`, `/api/simulados`, `/api/admin/questoes`.
+- Papel ADMIN: `/api/admin/**` exige `hasRole("ADMIN")`. Promoção por SQL: `UPDATE usuario SET papel='ADMIN' WHERE email='...';`
+- Gabarito só sai depois de responder (prática) ou ao finalizar (simulado). Questão ENEM_OFICIAL exige ano e fonte. Admin desativa em vez de apagar.
+- Frontend: `treinar.html/js` reescritos (prática, simulado, revisão de erros) usando a API.
+- Testes: `SeletorDeQuestoesTest` (puro), `QuestoesApiTest` (integração).
+- Simulado PERSONALIZADO (por prioridades) ficou de fora: só COMPLETO e por AREA.
+- Sem questões oficiais do INEP no banco: o ADMIN precisa cadastrar com ano e fonte reais.
+- Temporário: Treinar ainda copia acertos/erros por assunto no localStorage (páginas antigas) até a Etapa 8.
 
 ## Etapa 6: alterações (não testadas)
 - `plano/GeradorPlanoSemanal`: gerador puro. 6 dias (segunda a sábado), 2 blocos de estudo por dia de áreas diferentes + revisão quando há 60 min ou mais; soma do dia = tempo disponível exato; blocos < 60 min: 60%/40%, sem revisão; >= 60 min: 50% principal, 20% revisão (mínimo 10), resto no secundário.
@@ -59,7 +71,7 @@ Etapa 6 — Gerador de plano semanal (**escrita, NÃO testada**).
   Rodar `./mvnw test` localmente; esperado: `contextLoads` passa.
 - Se `validate` reclamar de tipo de coluna, ajustar a entidade ou a migração (primeiro ponto a conferir).
 - Se `springSecurity()`/MockMvc ou nomes de starters do Boot 4 falharem na compilação, ajustar import/dependência (pontos de maior risco da Etapa 3).
-- Painel admin (papel ADMIN) ainda não existe; só o papel ESTUDANTE.
+- Painel admin (tela) ainda não existe; o papel ADMIN existe e a API de cadastro de questões funciona (sem tela).
 - `peso_instituicao` e `nota_corte` estão vazias: a instituição só muda a recomendação quando houver dado cadastrado com ano e fonte (não inventar). Falta um jeito de cadastrar (painel admin ou migração com dados reais de edital/SISU).
 - Limiares e bônus da calculadora são heurísticas do Nivora (constantes em `CalculadoraPrioridades`), a validar na pesquisa.
 - Plano gerado na hora a cada acesso (não é gravado no banco); histórico de planos, se necessário, fica para depois.

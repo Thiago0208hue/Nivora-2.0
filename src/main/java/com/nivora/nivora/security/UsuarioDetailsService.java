@@ -22,7 +22,7 @@ public class UsuarioDetailsService implements UserDetailsService {
         return usuarios.findByEmail(email.trim().toLowerCase())
                 .map(u -> User.withUsername(u.getEmail())
                         .password(u.getSenhaHash())
-                        .roles("ESTUDANTE")
+                        .roles(u.getPapel().name())
                         .build())
                 .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado."));
     }
