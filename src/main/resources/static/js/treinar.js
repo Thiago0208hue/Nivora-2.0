@@ -145,10 +145,8 @@
       respondidas++;
       if (c.acertou) acertos++; else erros[q.assunto] = (erros[q.assunto] || 0) + 1;
       mostrarCorrecao(q, c.letraEscolhida, c.letraCorreta, c.resolucao);
-      compatibilidade(q.assunto, c.acertou);
     }
     if (!respondidas) { resultado.innerHTML = '<p class="hint">Marque ao menos uma alternativa.</p>'; return; }
-    NivoraGamification.adicionarXP(acertos * 5);
     const pct = Math.round((acertos / respondidas) * 100);
     resultado.innerHTML = `<div class="resultado-card"><p><strong>Acertos:</strong> ${acertos}/${respondidas} (${pct}%)</p>
       <p><strong>Tempo:</strong> ${Math.round((Date.now() - inicio) / 1000)}s</p>
@@ -166,10 +164,8 @@
     const r = await NivoraApi.post(`/api/simulados/${simuladoId}/finalizar`);
     const porId = Object.fromEntries(questoes.map(q => [q.id, q]));
     r.itens.forEach(it => {
-      if (it.letraEscolhida) compatibilidade(it.assunto, it.acertou);
       mostrarCorrecao(porId[it.questaoId], it.letraEscolhida, it.letraCorreta, it.resolucao);
     });
-    NivoraGamification.adicionarXP(r.acertos * 5);
     resultado.innerHTML = `<div class="resultado-card"><p><strong>Acertos:</strong> ${r.acertos}/${r.total}
       (${Math.round((r.acertos / r.total) * 100)}%)</p><p><strong>Em branco:</strong> ${r.emBranco}</p></div>`;
     document.getElementById('btnFinalizar').disabled = true;
@@ -204,15 +200,5 @@
         <p class="feedback">Você marcou ${esc(r.letraEscolhida)}; correta: ${esc(r.letraCorreta)}.
           ${r.resolucao ? '<br><em>' + esc(r.resolucao) + '</em>' : ''}</p>
       </div>`).join('');
-  }
-
-  // Cópia temporária no localStorage para as páginas antigas (dashboard/desempenho) até a Etapa 8.
-  function compatibilidade(assunto, acertou) {
-    const d = NivoraStorage.get(NivoraStorage.KEYS.DESEMPENHO, {});
-    const x = d[assunto] || { respondidas: 0, acertos: 0 };
-    x.respondidas++;
-    if (acertou) x.acertos++;
-    d[assunto] = x;
-    NivoraStorage.set(NivoraStorage.KEYS.DESEMPENHO, d);
   }
 })();

@@ -14,14 +14,9 @@
     return;
   }
 
-  // Até a Etapa 8 o desempenho ainda fica no navegador; o servidor o usa para adaptar o plano
-  await NivoraData.carregar();
-  const desempenho = NivoraStorage.get(NivoraStorage.KEYS.DESEMPENHO, {});
-  const desempenhoPorArea = NivoraPriorities.agregarDesempenhoPorArea(desempenho, NivoraData.assuntos || []);
-
   let plano;
   try {
-    plano = await NivoraApi.post('/api/plano/semanal', { desempenho: desempenhoPorArea });
+    plano = await NivoraApi.post('/api/plano/semanal');
   } catch (erro) {
     app.innerHTML = `
       <h1 class="section-title">Meu Plano</h1>

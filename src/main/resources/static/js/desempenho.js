@@ -1,120 +1,78 @@
-// desempenho.js — Etapa 3: Meu Desempenho + sistema adaptativo
-(function () {
+// desempenho.js — Etapa 8: Meu Desempenho (dados vêm de GET /api/desempenho)
+(async function () {
+  await NivoraApi.exigirLogin();
   const app = document.getElementById('desempenhoApp');
-  const desempenho = NivoraStorage.get(NivoraStorage.KEYS.DESEMPENHO, {});
-  const progresso = NivoraStorage.get(NivoraStorage.KEYS.PROGRESSO, { horasEstudadas: 0, questoesRespondidas: 0, acertos: 0, sequenciaDias: 0 });
+  const esc = NivoraApi.escapar;
+  const d = await NivoraApi.get('/api/desempenho');
 
-  const AREA_LABEL = { matematica: 'Matemática', natureza: 'Natureza', linguagens: 'Linguagens', humanas: 'Humanas', redacao: 'Redação' };
-
-  async function render() {
-    await NivoraData.carregar();
-
-    if (!Object.keys(desempenho).length) {
-      app.innerHTML = `
-        <h1 class="section-title">Meu Desempenho</h1>
-        <p class="hint">Você ainda não respondeu questões. Responda algumas em "Treinar" para ver seu desempenho aqui.</p>
-        <a href="/pages/treinar.html" class="btn btn-primary">Ir para Treinar</a>
-      `;
-      return;
-    }
-
-    // Agrega por área a partir dos assuntos respondidos
-    const porArea = {};
-    NivoraData.assuntos.forEach(grupo => {
-      grupo.assuntos.forEach(nome => {
-        if (!desempenho[nome]) return;
-        const a = porArea[grupo.area] || { respondidas: 0, acertos: 0 };
-        a.respondidas += desempenho[nome].respondidas;
-        a.acertos += desempenho[nome].acertos;
-        porArea[grupo.area] = a;
-      });
-    });
-
-    const erros = questoesErradas();
-    const total = progresso.questoesRespondidas;
-    const acertosTotal = progresso.acertos;
-    const percTotal = total ? Math.round((acertosTotal / total) * 100) : 0;
-
+  if (!d.respondidas) {
     app.innerHTML = `
       <h1 class="section-title">Meu Desempenho</h1>
-
-      <div class="dash-grid">
-        <div class="dash-card"><span class="dash-label">Questões respondidas</span><strong>${total}</strong></div>
-        <div class="dash-card"><span class="dash-label">Acertos</span><strong>${acertosTotal} (${percTotal}%)</strong></div>
-        <div class="dash-card"><span class="dash-label">Horas estudadas</span><strong>${progresso.horasEstudadas}h</strong></div>
-        <div class="dash-card"><span class="dash-label">Sequência de estudos</span><strong>${progresso.sequenciaDias} dias</strong></div>
-      </div>
-
-      <h2 class="section-title" style="margin-top:40px;">Evolução dos acertos</h2>
-      ${renderGraficoHistorico()}
-
-      <h2 class="section-title" style="margin-top:40px;">Desempenho por área</h2>
-      <div class="assunto-lista">
-        ${Object.entries(porArea).map(([area, d]) => {
-          const perc = Math.round((d.acertos / d.respondidas) * 100);
-          return `
-            <div class="assunto-item">
-              <div class="assunto-item-topo"><span>${AREA_LABEL[area] || area}</span><span class="hint">${perc}%</span></div>
-              <div class="mini-bar"><div class="mini-bar-fill" style="width:${perc}%"></div></div>
-            </div>`;
-        }).join('')}
-      </div>
-
-      <h2 class="section-title" style="margin-top:40px;">O que estudar agora?</h2>
-      ${renderRecomendacao(erros)}
-    `;
+      <p class="hint">Você ainda não respondeu questões. Responda algumas em "Treinar" para ver seu desempenho aqui.</p>
+      <a href="/pages/treinar.html" class="btn btn-primary">Ir para Treinar</a>`;
+    return;
   }
 
-  function renderGraficoHistorico() {
-    const historico = NivoraStorage.get(NivoraStorage.KEYS.HISTORICO, []);
-    if (historico.length < 2) {
-      return `<p class="hint">Responda questões em mais de uma sessão para ver seu gráfico de evolução.</p>`;
-    }
+  app.innerHTML = `
+    <h1 class="section-title">Meu Desempenho</h1>
+    <div class="dash-grid">
+      <div class="dash-card"><span class="dash-label">Questões respondidas</span><strong>${d.respondidas}</strong></div>
+      <div class="dash-card"><span class="dash-label">Acertos</span><strong>${d.acertos} (${d.percentual}%)</strong></div>
+      <div class="dash-card"><span class="dash-label">Sequência de estudos</span><strong>${d.sequenciaDias} dias</strong></div>
+      <div class="dash-card"><span class="dash-label">Nível</span><strong>${d.gamificacao.nivel} — ${d.gamificacao.xp} XP</strong></div>
+    </div>
+
+    <h2 class="section-title" style="margin-top:40px;">Evolução dos acertos por dia</h2>
+    ${grafico(d.ultimosDias)}
+
+    <h2 class="section-title" style="margin-top:40px;">Desempenho por área</h2>
+    <div class="assunto-lista">
+      ${d.porArea.map(a => barra(a.rotulo, a.percentual, `${a.acertos}/${a.respondidas}`)).join('')}
+    </div>
+
+    <h2 class="section-title" style="margin-top:40px;">Desempenho por assunto</h2>
+    <div class="assunto-lista">
+      ${d.porAssunto.map(a => barra(a.assunto, a.percentual, `${a.acertos}/${a.respondidas}`)).join('')}
+    </div>
+
+    <h2 class="section-title" style="margin-top:40px;">O que estudar agora?</h2>
+    ${recomendacao(d.assuntoMaisFraco)}`;
+
+  function barra(titulo, perc, detalhe) {
+    return `
+      <div class="assunto-item">
+        <div class="assunto-item-topo"><span>${esc(titulo)}</span><span class="hint">${perc}% (${esc(detalhe)})</span></div>
+        <div class="mini-bar"><div class="mini-bar-fill" style="width:${perc}%"></div></div>
+      </div>`;
+  }
+
+  function grafico(dias) {
+    if (dias.length < 2) return '<p class="hint">Responda questões em mais de um dia para ver o gráfico de evolução.</p>';
     const w = 600, h = 180, pad = 24;
-    const pontos = historico.map((s, i) => {
-      const x = pad + (i * (w - pad * 2)) / (historico.length - 1);
-      const y = pad + (h - pad * 2) * (1 - s.percentual / 100);
-      return { x, y, s };
-    });
-    const linha = pontos.map(p => `${p.x},${p.y}`).join(' ');
+    const pts = dias.map((x, i) => ({
+      x: pad + (i * (w - pad * 2)) / (dias.length - 1),
+      y: pad + (h - pad * 2) * (1 - x.percentual / 100), d: x
+    }));
     return `
       <svg viewBox="0 0 ${w} ${h}" class="grafico-evolucao" style="width:100%;height:auto;">
         <line x1="${pad}" y1="${h - pad}" x2="${w - pad}" y2="${h - pad}" stroke="var(--border)" />
-        <polyline points="${linha}" fill="none" stroke="var(--accent)" stroke-width="2" />
-        ${pontos.map(p => `<circle cx="${p.x}" cy="${p.y}" r="3" fill="var(--accent)"><title>${new Date(p.s.data).toLocaleDateString('pt-BR')} — ${p.s.percentual}%</title></circle>`).join('')}
+        <polyline points="${pts.map(p => p.x + ',' + p.y).join(' ')}" fill="none" stroke="var(--accent)" stroke-width="2" />
+        ${pts.map(p => `<circle cx="${p.x}" cy="${p.y}" r="3" fill="var(--accent)"><title>${esc(p.d.data)} — ${p.d.percentual}% (${p.d.acertos}/${p.d.respondidas})</title></circle>`).join('')}
       </svg>
-      <p class="hint">Últimas ${historico.length} sessões de treino (${historico[0].percentual}% → ${historico[historico.length - 1].percentual}%)</p>
-    `;
+      <p class="hint">Últimos dias com atividade (${dias[0].percentual}% → ${dias[dias.length - 1].percentual}%)</p>`;
   }
 
-  function questoesErradas() {
-    // Assunto com pior taxa de acerto (mínimo 1 questão respondida)
-    let pior = null;
-    Object.entries(desempenho).forEach(([assunto, d]) => {
-      if (!d.respondidas) return;
-      const taxa = d.acertos / d.respondidas;
-      if (!pior || taxa < pior.taxa) pior = { assunto, taxa, ...d };
-    });
-    return pior;
-  }
-
-  function renderRecomendacao(pior) {
-    if (!pior || pior.taxa >= 0.7) {
-      return `<p class="hint">Seu desempenho está equilibrado. Continue treinando para manter o ritmo.</p>`;
-    }
+  function recomendacao(f) {
+    if (!f) return '<p class="hint">Nenhum assunto com taxa de acerto baixa (considerando ao menos 3 respostas). Continue treinando.</p>';
     return `
       <div class="resultado-card">
-        <p>Você está errando questões de <strong>${pior.assunto}</strong>.</p>
+        <p>Seu assunto com mais erros é <strong>${esc(f.assunto)}</strong> (${f.percentual}% de acerto em ${f.respondidas} respostas).</p>
         <ol class="hint" style="padding-left:18px;">
-          <li>Revisar a teoria de ${pior.assunto}.</li>
-          <li>Resolver questões básicas do assunto.</li>
-          <li>Resolver questões intermediárias.</li>
-          <li>Fazer uma revisão.</li>
-          <li>Refazer as questões que você errou.</li>
+          <li>Revisar a teoria do assunto.</li>
+          <li>Resolver questões básicas dele.</li>
+          <li>Refazer as que você errou em <a href="/pages/treinar.html">Treinar → Revisar erros</a>.</li>
         </ol>
-      </div>
-    `;
+        <p class="hint">Regra do Nivora (não oficial): assunto com menos de 70% de acerto e ao menos 3 respostas.</p>
+      </div>`;
   }
-
-  render();
 })();

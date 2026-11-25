@@ -14,28 +14,18 @@
     return;
   }
 
-  await NivoraData.carregar();
-
-  const progresso = NivoraStorage.get(NivoraStorage.KEYS.PROGRESSO, {
-    horasEstudadas: 0, questoesRespondidas: 0, acertos: 0, sequenciaDias: 0
-  });
-  const desempenho = NivoraStorage.get(NivoraStorage.KEYS.DESEMPENHO, {});
-  const percAcerto = progresso.questoesRespondidas
-    ? Math.round((progresso.acertos / progresso.questoesRespondidas) * 100)
-    : 0;
+  const [dados, recomendacao] = await Promise.all([
+    NivoraApi.get('/api/desempenho'),
+    NivoraPerfil.prioridades()
+  ]);
+  const gam = dados.gamificacao;
   const progressoGeral = Math.round((
-    percAcerto +
-    Math.min(100, progresso.sequenciaDias * 10) +
-    Math.min(100, progresso.questoesRespondidas)
+    dados.percentual +
+    Math.min(100, dados.sequenciaDias * 10) +
+    Math.min(100, dados.respondidas)
   ) / 3);
-
-  const desempenhoPorArea = NivoraPriorities.agregarDesempenhoPorArea(desempenho, NivoraData.assuntos || []);
-  const recomendacao = await NivoraPerfil.prioridades(desempenhoPorArea);
   const prioridadesAtuais = recomendacao.prioridades;
   const ordem = Object.values(prioridadesAtuais).sort((a, b) => b.score - a.score);
-  const gam = NivoraGamification.verificarConquistas();
-  const nivel = NivoraGamification.nivel(gam.xp);
-  const xpNivelAtual = gam.xp % 100;
   const nomesConquistas = { xp100: 'Primeiros 100 XP', sequencia7: '7 dias estudando', questoes100: '100 questões resolvidas', primeiraRedacao: 'Primeira redação' };
 
   app.innerHTML = `
@@ -52,11 +42,10 @@
         <div class="mini-bar" style="margin-top:6px;"><div class="mini-bar-fill" style="width:${progressoGeral}%"></div></div>
         <strong style="font-size:.9rem;">${progressoGeral}%</strong>
       </div>
-      <div class="dash-card"><span class="dash-label">Horas estudadas</span><strong>${progresso.horasEstudadas}h</strong></div>
-      <div class="dash-card"><span class="dash-label">Questões respondidas</span><strong>${progresso.questoesRespondidas}</strong></div>
-      <div class="dash-card"><span class="dash-label">Acertos</span><strong>${percAcerto}%</strong></div>
-      <div class="dash-card"><span class="dash-label">Sequência de estudos</span><strong>${progresso.sequenciaDias} dias</strong></div>
-      <div class="dash-card"><span class="dash-label">Nível</span><strong>Nível ${nivel} — ${xpNivelAtual}/100 XP</strong></div>
+      <div class="dash-card"><span class="dash-label">Questões respondidas</span><strong>${dados.respondidas}</strong></div>
+      <div class="dash-card"><span class="dash-label">Acertos</span><strong>${dados.percentual}%</strong></div>
+      <div class="dash-card"><span class="dash-label">Sequência de estudos</span><strong>${dados.sequenciaDias} dias</strong></div>
+      <div class="dash-card"><span class="dash-label">Nível</span><strong>Nível ${gam.nivel} — ${gam.xpNoNivel}/100 XP</strong></div>
     </div>
 
     <h2 class="section-title" style="margin-top:40px;">Sua estratégia</h2>

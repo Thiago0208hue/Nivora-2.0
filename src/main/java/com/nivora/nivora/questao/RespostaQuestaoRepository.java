@@ -17,6 +17,41 @@ public interface RespostaQuestaoRepository extends JpaRepository<RespostaQuestao
         LocalDateTime getUltima();
     }
 
+    interface AreaAgregado {
+        com.nivora.nivora.curso.AreaEnem getArea();
+        Long getRespondidas();
+        Long getAcertos();
+    }
+
+    interface AssuntoAgregado {
+        com.nivora.nivora.curso.AreaEnem getArea();
+        String getAssunto();
+        Long getRespondidas();
+        Long getAcertos();
+    }
+
+    interface InstanteResposta {
+        LocalDateTime getRespondidaEm();
+        boolean getCorreta();
+    }
+
+    @Query("""
+            select r.questao.area as area, count(r) as respondidas,
+                   sum(case when r.correta = true then 1 else 0 end) as acertos
+            from RespostaQuestao r where r.usuario.id = :usuarioId group by r.questao.area
+            """)
+    List<AreaAgregado> agregadoPorArea(@Param("usuarioId") Long usuarioId);
+
+    @Query("""
+            select r.questao.area as area, r.questao.assunto as assunto, count(r) as respondidas,
+                   sum(case when r.correta = true then 1 else 0 end) as acertos
+            from RespostaQuestao r where r.usuario.id = :usuarioId
+            group by r.questao.area, r.questao.assunto
+            """)
+    List<AssuntoAgregado> agregadoPorAssunto(@Param("usuarioId") Long usuarioId);
+
+    List<InstanteResposta> findByUsuarioIdAndRespondidaEmAfter(Long usuarioId, LocalDateTime desde);
+
     /** Quantas vezes e quando o estudante respondeu cada questão (só as que já respondeu). */
     @Query("""
             select r.questao.id as questaoId, count(r) as vezes, max(r.respondidaEm) as ultima

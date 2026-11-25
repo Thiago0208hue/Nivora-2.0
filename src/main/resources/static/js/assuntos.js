@@ -2,7 +2,7 @@
 (async function () {
   const app = document.getElementById('assuntosApp');
   const perfil = NivoraStorage.get(NivoraStorage.KEYS.PERFIL);
-  const desempenho = NivoraStorage.get(NivoraStorage.KEYS.DESEMPENHO, {});
+  let desempenho = {};
   let prioridades = perfil?.prioridades ?? null;
 
   function statusDe(nome) {
@@ -18,10 +18,13 @@
 
   async function render() {
     await NivoraData.carregar();
+    try {
+      const d = await NivoraApi.get('/api/desempenho');
+      d.porAssunto.forEach(x => { desempenho[x.assunto] = { respondidas: x.respondidas, acertos: x.acertos }; });
+    } catch { /* sem login: mostra tudo como não iniciado */ }
     if (perfil) {
-      const desempenhoPorArea = NivoraPriorities.agregarDesempenhoPorArea(desempenho, NivoraData.assuntos || []);
       try {
-        prioridades = (await NivoraPerfil.prioridades(desempenhoPorArea)).prioridades;
+        prioridades = (await NivoraPerfil.prioridades()).prioridades;
       } catch {
         prioridades = null; // sem login ou servidor indisponível: a tela funciona sem as cores de prioridade
       }

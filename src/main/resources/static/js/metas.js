@@ -1,17 +1,17 @@
 // metas.js — Etapa 4: Metas
-(function () {
+(async function () {
+  await NivoraApi.exigirLogin();
+  const dados = await NivoraApi.get('/api/desempenho');
   const SUGESTOES = [
     { id: 'sug-questoes', texto: 'Resolver 30 questões', tipo: 'questoes', alvo: 30 },
-    { id: 'sug-horas', texto: 'Estudar 5 horas', tipo: 'horas', alvo: 5 },
     { id: 'sug-redacao', texto: 'Fazer uma redação', tipo: 'redacao', alvo: 1 },
     { id: 'sug-sequencia', texto: 'Estudar durante 7 dias seguidos', tipo: 'sequencia', alvo: 7 }
   ];
 
   function valorAtual(tipo) {
-    if (tipo === 'questoes') return NivoraStorage.get(NivoraStorage.KEYS.PROGRESSO, {}).questoesRespondidas || 0;
-    if (tipo === 'horas') return NivoraStorage.get(NivoraStorage.KEYS.PROGRESSO, {}).horasEstudadas || 0;
+    if (tipo === 'questoes') return dados.respondidas;
     if (tipo === 'redacao') return NivoraStorage.get(NivoraStorage.KEYS.REDACOES, []).length;
-    if (tipo === 'sequencia') return NivoraStorage.get(NivoraStorage.KEYS.PROGRESSO, {}).sequenciaDias || 0;
+    if (tipo === 'sequencia') return dados.sequenciaDias;
     return null; // manual
   }
 
@@ -46,7 +46,6 @@
       const m = metas.find(x => x.id === btn.dataset.add);
       if (m && m.atual < m.alvo) {
         m.atual = Math.min(m.alvo, m.atual + 1);
-        if (m.atual >= m.alvo) NivoraGamification.adicionarXP(15);
       }
       NivoraStorage.set(NivoraStorage.KEYS.METAS, metas);
       renderManuais();

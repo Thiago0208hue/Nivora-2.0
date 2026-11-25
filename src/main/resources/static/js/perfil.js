@@ -54,10 +54,10 @@ const NivoraPerfil = {
     return this.carregar();
   },
 
-  // Prioridades calculadas pelo servidor (POST /api/personalizacao/prioridades).
+  // Prioridades calculadas pelo servidor com o desempenho gravado no banco (POST /api/personalizacao/prioridades).
   // Devolve as áreas no formato usado pelas telas: { matematica: { label, score, nivel, cor, motivos, ... } }
-  async prioridades(desempenhoPorArea = {}) {
-    const resposta = await NivoraApi.post('/api/personalizacao/prioridades', { desempenho: desempenhoPorArea });
+  async prioridades() {
+    const resposta = await NivoraApi.post('/api/personalizacao/prioridades');
     const rotulos = { ALTA: 'Alta', MEDIA: 'Média', BAIXA: 'Baixa' };
     const cores = { ALTA: '🔴', MEDIA: '🟡', BAIXA: '🟢' };
     const porArea = {};

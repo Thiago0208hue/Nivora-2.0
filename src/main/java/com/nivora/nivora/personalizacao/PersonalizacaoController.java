@@ -1,9 +1,8 @@
 package com.nivora.nivora.personalizacao;
 
-import jakarta.validation.Valid;
+import com.nivora.nivora.desempenho.DesempenhoService;
 import java.security.Principal;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -12,15 +11,16 @@ import org.springframework.web.bind.annotation.RestController;
 public class PersonalizacaoController {
 
     private final PersonalizacaoService service;
+    private final DesempenhoService desempenho;
 
-    public PersonalizacaoController(PersonalizacaoService service) {
+    public PersonalizacaoController(PersonalizacaoService service, DesempenhoService desempenho) {
         this.service = service;
+        this.desempenho = desempenho;
     }
 
-    /** POST porque o navegador envia o desempenho local; o cálculo em si não altera nada. */
+    /** O desempenho vem do banco (respostas gravadas); qualquer desempenho enviado pelo navegador é ignorado. */
     @PostMapping("/prioridades")
-    public RecomendacaoResponse prioridades(Principal usuarioLogado,
-                                            @Valid @RequestBody(required = false) PersonalizacaoRequest pedido) {
-        return service.recomendar(usuarioLogado.getName(), pedido == null ? null : pedido.desempenho());
+    public RecomendacaoResponse prioridades(Principal usuarioLogado) {
+        return service.recomendar(usuarioLogado.getName(), desempenho.porArea(usuarioLogado.getName()));
     }
 }

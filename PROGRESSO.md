@@ -1,12 +1,23 @@
 # PROGRESSO — Nivora 2.0
 
 ## Etapa atual
-Etapa 7 — Questões e simulados (**escrita, NÃO testada**; Etapas 2–6 também aguardam `./mvnw test`).
+Etapa 8 — Desempenho e progresso (**escrita, NÃO testada**; Etapas 2–7 também aguardam `./mvnw test`).
 
 ## Concluídas
 - Etapa 0 — Auditoria (doc "Nivora 2.0 — Etapa 0: Diagnóstico").
 - Etapa 1 — Preparação do backend (validada pelo usuário: `./mvnw test`).
-- Etapas 2 a 6 — escritas, aguardando teste do usuário.
+- Etapas 2 a 7 — escritas, aguardando teste do usuário.
+
+## Etapa 8: alterações (não testadas)
+- Pacote `desempenho/`: `CalculadoraProgresso` (pura: XP, nível, sequência, conquistas, assunto mais fraco), `DesempenhoService`, `GET /api/desempenho`.
+- O desempenho agora vem das respostas gravadas no banco. `/api/personalizacao/prioridades` e `/api/plano/semanal` ignoram qualquer desempenho enviado pelo navegador (removido `PersonalizacaoRequest`).
+- Regras do Nivora (não oficiais): XP = 5 por acerto; nível a cada 100 XP; sequência = dias seguidos com resposta (a de ontem vale até acabar o dia de hoje); assunto fraco = <70% de acerto com ao menos 3 respostas; conquistas xp100, sequencia7, questoes100 (pelo melhor resultado).
+- Frontend: dashboard, desempenho, assuntos, plano, metas e treinar usam a API. Removidos localStorage de desempenho/progresso/histórico/XP nessas telas.
+- "Horas estudadas" foi removida: o sistema não mede tempo de estudo real, e não vamos inventar o número.
+- Testes: `CalculadoraProgressoTest` (puro), `DesempenhoApiTest` (integração).
+- Dia da sequência usa o horário do servidor (`LocalDate.now()`); se o servidor ficar em fuso diferente do Brasil, o dia vira em outra hora. Definir fuso na Etapa 12.
+- Conquista "Primeira redação" fica para a Etapa 9. Metas manuais e redações ainda usam localStorage.
+- `gamificacao.js` ficou só por causa da redação (XP local); sai na Etapa 9.
 
 ## Etapa 7: alterações (não testadas)
 - Migrações: `V3__papel_usuario.sql` (coluna `papel`), `V4__questoes.sql` (questao, alternativa, simulado, simulado_questao, resposta_questao), `V5__questoes_exemplo.sql` (8 questões de EXEMPLO, origem marcada como não oficial).
@@ -17,7 +28,7 @@ Etapa 7 — Questões e simulados (**escrita, NÃO testada**; Etapas 2–6 tamb�
 - Testes: `SeletorDeQuestoesTest` (puro), `QuestoesApiTest` (integração).
 - Simulado PERSONALIZADO (por prioridades) ficou de fora: só COMPLETO e por AREA.
 - Sem questões oficiais do INEP no banco: o ADMIN precisa cadastrar com ano e fonte reais.
-- Temporário: Treinar ainda copia acertos/erros por assunto no localStorage (páginas antigas) até a Etapa 8.
+- (Resolvido na Etapa 8) a cópia local de acertos/erros foi removida.
 
 ## Etapa 6: alterações (não testadas)
 - `plano/GeradorPlanoSemanal`: gerador puro. 6 dias (segunda a sábado), 2 blocos de estudo por dia de áreas diferentes + revisão quando há 60 min ou mais; soma do dia = tempo disponível exato; blocos < 60 min: 60%/40%, sem revisão; >= 60 min: 50% principal, 20% revisão (mínimo 10), resto no secundário.
