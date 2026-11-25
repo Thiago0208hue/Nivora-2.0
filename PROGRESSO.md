@@ -1,11 +1,18 @@
 # PROGRESSO — Nivora 2.0
 
 ## Etapa atual
-Etapa 5 — Personalização inteligente (**escrita, NÃO testada**).
+Etapa 6 — Gerador de plano semanal (**escrita, NÃO testada**).
 
 ## Concluídas
 - Etapa 0 — Auditoria (doc "Nivora 2.0 — Etapa 0: Diagnóstico").
 - Etapa 1 — Preparação do backend (validada pelo usuário: `./mvnw test`).
+
+## Etapa 6: alterações (não testadas)
+- `plano/GeradorPlanoSemanal`: gerador puro. 6 dias (segunda a sábado), 2 blocos de estudo por dia de áreas diferentes + revisão quando há 60 min ou mais; soma do dia = tempo disponível exato; blocos < 60 min: 60%/40%, sem revisão; >= 60 min: 50% principal, 20% revisão (mínimo 10), resto no secundário.
+- Distribuição: cada área ganha ao menos 1 bloco na semana (prioridade alta, 2); os blocos restantes vão por D'Hondt (score/(blocos+1)); máximo 1 bloco por área por dia. Escolha diária: as duas áreas com mais blocos restantes (garante encaixe sem repetir), preferindo as não estudadas no dia anterior.
+- `plano/PlanoService` (usa `PersonalizacaoService`, então considera dificuldades e desempenho; dificuldades viram "foco" nos blocos) e `POST /api/plano/semanal` (`PlanoController`).
+- Frontend: `plano.js` reescrito para usar a API (mostra blocos com prioridade e foco, distribuição da semana e avisos).
+- Testes: `GeradorPlanoSemanalTest` (11, perfis Direito, Medicina e Computação, vários tempos e níveis), `PlanoServiceTest` (4) e um caso em `AutenticacaoTest`.
 
 ## Etapa 5: alterações (não testadas)
 - `personalizacao/CalculadoraPrioridades`: cálculo puro das prioridades (sem banco), com motivos explicados por área.
@@ -55,7 +62,8 @@ Etapa 5 — Personalização inteligente (**escrita, NÃO testada**).
 - Painel admin (papel ADMIN) ainda não existe; só o papel ESTUDANTE.
 - `peso_instituicao` e `nota_corte` estão vazias: a instituição só muda a recomendação quando houver dado cadastrado com ano e fonte (não inventar). Falta um jeito de cadastrar (painel admin ou migração com dados reais de edital/SISU).
 - Limiares e bônus da calculadora são heurísticas do Nivora (constantes em `CalculadoraPrioridades`), a validar na pesquisa.
-- O plano semanal (`plano.js`) ainda tem o bug do pool repetido; corrige na Etapa 6.
+- Plano gerado na hora a cada acesso (não é gravado no banco); histórico de planos, se necessário, fica para depois.
+- Domingo fica sem estudo (descanso), como no protótipo.
 - Temporário: Plano, Assuntos, Treinar, Desempenho, Redação, Metas e Objetivo ainda usam localStorage; `perfil.js` guarda uma cópia do perfil lá para elas funcionarem. Progresso local é apagado ao sair.
 - Páginas internas são servidas sem login (o JS redireciona); os dados estão protegidos na API.
 - Fontes do Google Fonts ainda carregadas de terceiros (LGPD): resolver nas etapas 10/11 (hospedar localmente).
@@ -73,3 +81,4 @@ Etapa 5 — Personalização inteligente (**escrita, NÃO testada**).
 - Perfil guarda `formaIngresso` (SISU/ProUni...) e `modalidadeIngresso` (ampla concorrência/escola pública...) em campos separados, como no onboarding original.
 - Cálculo no servidor, sem IA generativa; a calculadora é uma classe pura (testável sem banco).
 - O desempenho vem do navegador (POST) só até a Etapa 8, quando passa a ser lido do banco.
+- Plano 100% calculado no servidor, sem IA; o gerador é uma classe pura testada para vários perfis e tempos.

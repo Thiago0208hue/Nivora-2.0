@@ -151,6 +151,26 @@ class AutenticacaoTest {
     }
 
     @Test
+    void planoSemanalExigeLoginEDevolveSeisDias() throws Exception {
+        mvc.perform(post("/api/plano/semanal").with(csrf())).andExpect(status().isUnauthorized());
+
+        cadastrar();
+        MockHttpSession sessao = logar();
+        mvc.perform(put("/api/perfil").session(sessao).with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"cursoCodigo\":\"direito\",\"instituicaoSigla\":\"ufrn\","
+                        + "\"nivel\":\"INTERMEDIARIO\",\"minutosDiarios\":120,\"onboardingConcluido\":true}"))
+                .andExpect(status().isOk());
+
+        mvc.perform(post("/api/plano/semanal").session(sessao).with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"desempenho\":{\"matematica\":{\"respondidas\":10,\"acertos\":3}}}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.dias.length()").value(6))
+                .andExpect(jsonPath("$.minutosPorDia").value(120));
+    }
+
+    @Test
     void logoutEncerraASessao() throws Exception {
         cadastrar();
         MockHttpSession sessao = logar();

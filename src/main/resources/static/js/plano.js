@@ -1,8 +1,9 @@
-// plano.js — Etapa 3: Meu Plano (cronograma automático, readapta com o desempenho)
+// plano.js — Meu Plano: cronograma semanal gerado pelo servidor (GeradorPlanoSemanal)
 (async function () {
   await NivoraApi.exigirLogin();
   const app = document.getElementById('planoApp');
-  const perfil = NivoraStorage.get(NivoraStorage.KEYS.PERFIL);
+  const esc = NivoraApi.escapar;
+  const perfil = await NivoraPerfil.carregar();
 
   if (!perfil) {
     app.innerHTML = `
@@ -13,10 +14,21 @@
     return;
   }
 
+  // Até a Etapa 8 o desempenho ainda fica no navegador; o servidor o usa para adaptar o plano
   await NivoraData.carregar();
   const desempenho = NivoraStorage.get(NivoraStorage.KEYS.DESEMPENHO, {});
   const desempenhoPorArea = NivoraPriorities.agregarDesempenhoPorArea(desempenho, NivoraData.assuntos || []);
-  const prioridadesAtuais = (await NivoraPerfil.prioridades(desempenhoPorArea)).prioridades;
+
+  let plano;
+  try {
+    plano = await NivoraApi.post('/api/plano/semanal', { desempenho: desempenhoPorArea });
+  } catch (erro) {
+    app.innerHTML = `
+      <h1 class="section-title">Meu Plano</h1>
+      <p class="hint">Não foi possível gerar o plano agora: ${esc(erro.message)}</p>
+    `;
+    return;
+  }
 
   function formatMin(min) {
     if (min >= 60) {
@@ -26,44 +38,42 @@
     return `${min}min`;
   }
 
-  function gerarPlano(perfil, prioridades) {
-    const areas = Object.values(prioridades).sort((a, b) => b.score - a.score);
-    const pool = [];
-    areas.forEach(a => { const reps = Math.max(1, Math.round(a.score)); for (let i = 0; i < reps; i++) pool.push(a); });
+  const cores = { ALTA: '🔴', MEDIA: '🟡', BAIXA: '🟢' };
+  const rotulos = {};
+  plano.dias.forEach(d => d.blocos.forEach(b => { if (b.area) rotulos[b.area] = b.rotulo; }));
+  const totalEstudo = Object.values(plano.minutosPorArea).reduce((soma, m) => soma + m, 0);
+  const distribuicao = Object.entries(plano.minutosPorArea).sort((a, b) => b[1] - a[1]);
 
-    const tempoMin = perfil.tempoMin || 120;
-    const primaryMin = Math.round((tempoMin * 0.5) / 5) * 5;
-    const secondaryMin = Math.round((tempoMin * 0.3) / 5) * 5;
-    const revisaoMin = Math.max(10, tempoMin - primaryMin - secondaryMin);
-
-    const dias = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
-    return dias.map((dia, i) => {
-      const primary = pool[i % pool.length];
-      let secondary = pool[(i + 1) % pool.length];
-      if (secondary.label === primary.label) secondary = pool[(i + 2) % pool.length];
-      return {
-        dia,
-        blocos: [
-          { area: primary.label, min: primaryMin },
-          { area: secondary.label, min: secondaryMin },
-          { area: 'Revisão', min: revisaoMin }
-        ]
-      };
-    });
+  function htmlBloco(b) {
+    if (b.tipo === 'REVISAO') {
+      return `<p><strong>${formatMin(b.minutos)}</strong> 🔁 Revisão</p>`;
+    }
+    const foco = b.foco && b.foco.length
+      ? `<br><span class="hint">Foco: ${esc(b.foco.join(', '))}</span>` : '';
+    return `<p><strong>${formatMin(b.minutos)}</strong> ${cores[b.prioridade] || ''} ${esc(b.rotulo)}${foco}</p>`;
   }
-
-  const plano = gerarPlano(perfil, prioridadesAtuais);
 
   app.innerHTML = `
     <h1 class="section-title">Meu Plano</h1>
-    <p class="hint">Cronograma gerado com base no seu tempo diário e nas suas prioridades. Ele se adapta conforme seu desempenho evolui.</p>
+    <p class="hint">Cronograma de ${formatMin(plano.minutosPorDia)} por dia, gerado a partir das suas prioridades. Ele se adapta conforme seu desempenho evolui.</p>
     <div class="plano-grid">
-      ${plano.map(d => `
+      ${plano.dias.map(d => `
         <div class="plano-card">
-          <h3>${d.dia.toUpperCase()}</h3>
-          ${d.blocos.map(b => `<p><strong>${formatMin(b.min)}</strong> ${b.area}</p>`).join('')}
+          <h3>${esc(d.dia.toUpperCase())}</h3>
+          ${d.blocos.map(htmlBloco).join('')}
         </div>
       `).join('')}
     </div>
+
+    <h2 class="section-title" style="margin-top:40px;">Distribuição da semana</h2>
+    <div class="metas-lista">
+      ${distribuicao.map(([area, min]) => `
+        <div class="assunto-item">
+          <div class="assunto-item-topo"><span>${esc(rotulos[area] || area)}</span><span>${formatMin(min)}</span></div>
+          <div class="mini-bar"><div class="mini-bar-fill" style="width:${totalEstudo ? Math.round(min / totalEstudo * 100) : 0}%"></div></div>
+        </div>
+      `).join('')}
+    </div>
+    ${NivoraPerfil.htmlAvisos(plano.avisos)}
   `;
 })();
