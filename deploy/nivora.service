@@ -1,0 +1,15 @@
+# MODELO (não testado). Copie para /etc/systemd/system/nivora.service
+[Unit]
+Description=Nivora 2.0
+After=network.target mysql.service
+
+[Service]
+User=nivora
+EnvironmentFile=/etc/nivora/nivora.env
+# user.timezone: o "dia" da sequência de estudos segue o horário do Brasil
+ExecStart=/usr/bin/java -Duser.timezone=America/Fortaleza -Xmx512m -jar /opt/nivora/nivora.jar
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

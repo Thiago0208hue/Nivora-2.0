@@ -1,12 +1,18 @@
 # PROGRESSO — Nivora 2.0
 
 ## Etapa atual
-Etapa 11 — Preparação do TCC (documentação + métricas; **código Java NÃO testado**; Etapas 2–10 aguardam `./mvnw test`).
+Etapa 12 — Publicação (roteiro e modelos; **nada contratado nem executado**; Etapas 2–11 aguardam `./mvnw test`).
 
 ## Concluídas
 - Etapa 0 — Auditoria (doc "Nivora 2.0 — Etapa 0: Diagnóstico").
 - Etapa 1 — Preparação do backend (validada pelo usuário: `./mvnw test`).
 - Etapas 2 a 10 — escritas, aguardando teste do usuário.
+
+## Etapa 12: alterações (nada contratado, nada executado)
+- `docs/PUBLICACAO.md`: opções de hospedagem com custos consultados em 25/11/2026 (PC em casa, Oracle Always Free, VPS pago), passo a passo com DuckDNS + Caddy (HTTPS), banco, backup, monitoramento, checklist e decisões que dependem do usuário.
+- `deploy/`: modelos NÃO TESTADOS (`nivora.service`, `Caddyfile`, `backup.sh`, `nivora.env.example`). Só a sintaxe do `backup.sh` foi checada (`sh -n`).
+- `application-prod.properties`: `forward-headers-strategy=framework` (IP real para o limitador de login) e `server.address=127.0.0.1` (só o proxy alcança a aplicação). Resolve o risco do limitador atrás de proxy; fuso resolvido com `-Duser.timezone` no serviço.
+- Decisão pendente do usuário: onde hospedar (e se o comitê de ética restringe o local dos dados).
 
 ## Etapa 11: alterações
 - `README.md` (execução, variáveis de ambiente, virar ADMIN) e `docs/`: `ARQUITETURA.md`, `API.md`, `BANCO.md` (diagrama Mermaid), `AVALIACAO.md` (DSR, SUS, pré/pós-teste, métricas, LGPD).

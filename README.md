@@ -37,4 +37,5 @@ UPDATE usuario SET papel = 'ADMIN' WHERE email = 'seu@email.com';
 - [API](docs/API.md)
 - [Banco de dados (diagrama)](docs/BANCO.md)
 - [Avaliação e pesquisa (DSR, SUS, pré/pós-teste, LGPD)](docs/AVALIACAO.md)
+- [Publicação (hospedagem, HTTPS, backup)](docs/PUBLICACAO.md)
 - [Progresso e pendências](PROGRESSO.md)

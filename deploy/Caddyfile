@@ -1,0 +1,6 @@
+# MODELO (não testado). Troque pelo seu subdomínio DuckDNS.
+# O Caddy obtém e renova o certificado HTTPS sozinho (Let's Encrypt); exige as portas 80 e 443 abertas na internet.
+SEU-SUBDOMINIO.duckdns.org {
+    encode gzip
+    reverse_proxy 127.0.0.1:8080
+}
