@@ -5,6 +5,7 @@ import com.nivora.nivora.curso.AreaEnem;
 import com.nivora.nivora.desempenho.DesempenhoDtos.*;
 import com.nivora.nivora.personalizacao.DesempenhoArea;
 import com.nivora.nivora.questao.RespostaQuestaoRepository;
+import com.nivora.nivora.redacao.RedacaoRepository;
 import com.nivora.nivora.usuario.Usuario;
 import com.nivora.nivora.usuario.UsuarioRepository;
 import java.time.LocalDate;
@@ -29,9 +30,12 @@ public class DesempenhoService {
 
     private final RespostaQuestaoRepository respostas;
     private final UsuarioRepository usuarios;
+    private final RedacaoRepository redacoesRepo;
     private final CalculadoraProgresso calculadora = new CalculadoraProgresso();
 
-    public DesempenhoService(RespostaQuestaoRepository respostas, UsuarioRepository usuarios) {
+    public DesempenhoService(RespostaQuestaoRepository respostas, UsuarioRepository usuarios,
+                             RedacaoRepository redacoesRepo) {
+        this.redacoesRepo = redacoesRepo;
         this.respostas = respostas;
         this.usuarios = usuarios;
     }
@@ -86,9 +90,10 @@ public class DesempenhoService {
                 .forEach(e -> ultimos.add(new DiaDesempenho(e.getKey().toString(), e.getValue()[0], e.getValue()[1],
                         percentual(e.getValue()[1], e.getValue()[0]))));
 
-        int xp = calculadora.xp(acertos);
+        int qtdRedacoes = (int) redacoesRepo.countByUsuarioId(usuario.getId());
+        int xp = calculadora.xp(acertos, qtdRedacoes);
         Gamificacao gam = new Gamificacao(xp, calculadora.nivel(xp), calculadora.xpNoNivel(xp),
-                calculadora.conquistas(xp, calculadora.maiorSequencia(dias), total));
+                calculadora.conquistas(xp, calculadora.maiorSequencia(dias), total, qtdRedacoes));
 
         AssuntoDesempenho fraco = calculadora.assuntoMaisFraco(assuntos.stream()
                         .map(a -> new CalculadoraProgresso.AssuntoStats(a.assunto(), a.respondidas(), a.acertos())).toList())
@@ -96,7 +101,7 @@ public class DesempenhoService {
                 .orElse(null);
 
         return new DesempenhoResponse(total, acertos, percentual(acertos, total),
-                calculadora.sequenciaAtual(dias, hoje), areas, assuntos, ultimos, fraco, gam);
+                calculadora.sequenciaAtual(dias, hoje), qtdRedacoes, areas, assuntos, ultimos, fraco, gam);
     }
 
     private static int percentual(long acertos, long respondidas) {

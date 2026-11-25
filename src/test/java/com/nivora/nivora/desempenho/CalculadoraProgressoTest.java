@@ -52,6 +52,12 @@ class CalculadoraProgressoTest {
     }
 
     @Test
+    void redacaoDaXpEConquista() {
+        assertEquals(60, calc.xp(10, 1));
+        assertEquals(List.of("primeiraRedacao"), calc.conquistas(0, 0, 0, 1));
+    }
+
+    @Test
     void assuntoMaisFracoExigeRespostasSuficientesETaxaBaixa() {
         var poucoDado = new AssuntoStats("A", 2, 0);
         var bom = new AssuntoStats("B", 10, 9);

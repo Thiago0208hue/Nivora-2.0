@@ -10,7 +10,7 @@
 
   function valorAtual(tipo) {
     if (tipo === 'questoes') return dados.respondidas;
-    if (tipo === 'redacao') return NivoraStorage.get(NivoraStorage.KEYS.REDACOES, []).length;
+    if (tipo === 'redacao') return dados.redacoes;
     if (tipo === 'sequencia') return dados.sequenciaDias;
     return null; // manual
   }

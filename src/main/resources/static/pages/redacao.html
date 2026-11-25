@@ -36,6 +36,7 @@
     <h2>Tema para praticar</h2>
     <div class="resultado-card">
       <p id="temaAtual"></p>
+      <p class="hint" id="origemTema"></p>
       <button class="btn btn-outline btn-sm" id="btnNovoTema">Sortear outro tema</button>
     </div>
   </section>
@@ -50,24 +51,33 @@
   </section>
 
   <section class="redacao-secao">
-    <h2>Competências avaliadas</h2>
-    <div class="option-list" id="checklistCompetencias">
-      <label class="option-card"><input type="checkbox"><span>Domínio da norma culta</span></label>
-      <label class="option-card"><input type="checkbox"><span>Compreensão da proposta e do tema</span></label>
-      <label class="option-card"><input type="checkbox"><span>Seleção e organização de argumentos</span></label>
-      <label class="option-card"><input type="checkbox"><span>Coesão e coerência textual</span></label>
-      <label class="option-card"><input type="checkbox"><span>Proposta de intervenção</span></label>
-    </div>
+    <h2>Escreva sua redação</h2>
+    <textarea id="editorRedacao" class="redacao-textarea" maxlength="8000" placeholder="Comece a escrever aqui..."></textarea>
+    <div class="redacao-footer"><span class="hint" id="contadorPalavras">0 palavras</span></div>
   </section>
 
   <section class="redacao-secao">
-    <h2>Escreva sua redação</h2>
-    <textarea id="editorRedacao" class="redacao-textarea" placeholder="Comece a escrever aqui..."></textarea>
-    <div class="redacao-footer">
-      <span class="hint" id="contadorPalavras">0 palavras</span>
-      <button class="btn btn-primary" id="btnAvaliar">Avaliar</button>
+    <h2>Sua autoavaliação (opcional)</h2>
+    <p class="hint">O Nivora não corrige o conteúdo da sua redação. Se quiser, dê a você mesmo uma nota de 0 a 200 em cada competência (use a cartilha oficial do INEP como guia) para acompanhar sua evolução. Preencha as cinco ou nenhuma.</p>
+    <div class="option-list" id="autoavaliacao">
+      <label class="option-card"><span>C1 — Domínio da norma culta</span>
+        <select class="comp" data-i="0"><option value="">—</option><option value="0">0</option><option value="40">40</option><option value="80">80</option><option value="120">120</option><option value="160">160</option><option value="200">200</option></select></label>
+      <label class="option-card"><span>C2 — Compreensão da proposta e do tema</span>
+        <select class="comp" data-i="1"><option value="">—</option><option value="0">0</option><option value="40">40</option><option value="80">80</option><option value="120">120</option><option value="160">160</option><option value="200">200</option></select></label>
+      <label class="option-card"><span>C3 — Seleção e organização de argumentos</span>
+        <select class="comp" data-i="2"><option value="">—</option><option value="0">0</option><option value="40">40</option><option value="80">80</option><option value="120">120</option><option value="160">160</option><option value="200">200</option></select></label>
+      <label class="option-card"><span>C4 — Coesão e coerência textual</span>
+        <select class="comp" data-i="3"><option value="">—</option><option value="0">0</option><option value="40">40</option><option value="80">80</option><option value="120">120</option><option value="160">160</option><option value="200">200</option></select></label>
+      <label class="option-card"><span>C5 — Proposta de intervenção</span>
+        <select class="comp" data-i="4"><option value="">—</option><option value="0">0</option><option value="40">40</option><option value="80">80</option><option value="120">120</option><option value="160">160</option><option value="200">200</option></select></label>
     </div>
+    <div class="redacao-footer"><span></span><button class="btn btn-primary" id="btnSalvar">Salvar redação</button></div>
     <div id="avaliacaoResultado"></div>
+  </section>
+
+  <section class="redacao-secao">
+    <h2>Suas redações</h2>
+    <div id="historicoRedacoes"></div>
   </section>
 </main>
 
@@ -82,9 +92,9 @@
   <a href="/pages/configuracoes.html"><span>⚙️</span>Config</a>
 </nav>
 
+<script src="/js/api.js"></script>
 <script src="/js/storage.js"></script>
 <script src="/js/app.js"></script>
-<script src="/js/gamificacao.js"></script>
 <script src="/js/redacao.js"></script>
 </body>
 </html>

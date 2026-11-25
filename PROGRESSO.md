@@ -1,12 +1,24 @@
 # PROGRESSO — Nivora 2.0
 
 ## Etapa atual
-Etapa 8 — Desempenho e progresso (**escrita, NÃO testada**; Etapas 2–7 também aguardam `./mvnw test`).
+Etapa 9 — Redação (**escrita, NÃO testada**; Etapas 2–8 também aguardam `./mvnw test`).
 
 ## Concluídas
 - Etapa 0 — Auditoria (doc "Nivora 2.0 — Etapa 0: Diagnóstico").
 - Etapa 1 — Preparação do backend (validada pelo usuário: `./mvnw test`).
-- Etapas 2 a 7 — escritas, aguardando teste do usuário.
+- Etapas 2 a 8 — escritas, aguardando teste do usuário.
+
+## Etapa 9: alterações (não testadas)
+- `V6__redacao.sql`: `tema_redacao` (5 temas do protótipo, origem EXEMPLO: não afirmamos que sejam oficiais) e `redacao`.
+- Pacote `redacao/`: `AnaliseEstrutural` (pura: conta palavras e parágrafos, dá orientações), `RedacaoService`, endpoints `GET /api/redacao/temas`, `POST/GET /api/redacao`, `GET /api/redacao/{id}`.
+- Sem correção automática: o Nivora NÃO avalia o conteúdo. A nota é uma autoavaliação opcional do estudante (5 competências, níveis 0/40/80/120/160/200, total até 1000). A "pontuação /100" inventada do protótipo foi removida.
+- Redação soma 10 XP e libera a conquista `primeiraRedacao` (calculado no servidor). `DesempenhoResponse` ganhou `redacoes`; a meta "fazer uma redação" usa o servidor.
+- `gamificacao.js` removido: XP, nível e conquistas agora só no servidor.
+- Frontend: `redacao.html/js` reescritos (editor, autoavaliação opcional, histórico).
+- Testes: `AnaliseEstruturalTest` (puro), `RedacaoApiTest` (integração), `CalculadoraProgressoTest` (redação).
+- Texto da redação é dado pessoal (LGPD): só o dono lê; falta exclusão de redações/conta.
+- Orientações de estrutura (4 parágrafos, 150 palavras) são referência do Nivora, não regra oficial.
+- Metas manuais ainda usam localStorage.
 
 ## Etapa 8: alterações (não testadas)
 - Pacote `desempenho/`: `CalculadoraProgresso` (pura: XP, nível, sequência, conquistas, assunto mais fraco), `DesempenhoService`, `GET /api/desempenho`.
@@ -16,8 +28,8 @@ Etapa 8 — Desempenho e progresso (**escrita, NÃO testada**; Etapas 2–7 tamb
 - "Horas estudadas" foi removida: o sistema não mede tempo de estudo real, e não vamos inventar o número.
 - Testes: `CalculadoraProgressoTest` (puro), `DesempenhoApiTest` (integração).
 - Dia da sequência usa o horário do servidor (`LocalDate.now()`); se o servidor ficar em fuso diferente do Brasil, o dia vira em outra hora. Definir fuso na Etapa 12.
-- Conquista "Primeira redação" fica para a Etapa 9. Metas manuais e redações ainda usam localStorage.
-- `gamificacao.js` ficou só por causa da redação (XP local); sai na Etapa 9.
+- (Resolvido na Etapa 9) conquista da primeira redação.
+- (Resolvido na Etapa 9) `gamificacao.js` removido.
 
 ## Etapa 7: alterações (não testadas)
 - Migrações: `V3__papel_usuario.sql` (coluna `papel`), `V4__questoes.sql` (questao, alternativa, simulado, simulado_questao, resposta_questao), `V5__questoes_exemplo.sql` (8 questões de EXEMPLO, origem marcada como não oficial).

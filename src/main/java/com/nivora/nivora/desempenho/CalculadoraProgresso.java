@@ -22,8 +22,14 @@ public class CalculadoraProgresso {
     public record AssuntoStats(String assunto, int respondidas, int acertos) {
     }
 
+    public static final int XP_POR_REDACAO = 10;
+
     public int xp(int acertos) {
-        return acertos * XP_POR_ACERTO;
+        return xp(acertos, 0);
+    }
+
+    public int xp(int acertos, int redacoes) {
+        return acertos * XP_POR_ACERTO + redacoes * XP_POR_REDACAO;
     }
 
     public int nivel(int xp) {
@@ -58,10 +64,15 @@ public class CalculadoraProgresso {
 
     /** Conquistas ficam registradas pelo melhor resultado: perder a sequência não apaga a conquista. */
     public List<String> conquistas(int xp, int maiorSequencia, int questoesRespondidas) {
+        return conquistas(xp, maiorSequencia, questoesRespondidas, 0);
+    }
+
+    public List<String> conquistas(int xp, int maiorSequencia, int questoesRespondidas, int redacoes) {
         List<String> ids = new ArrayList<>();
         if (xp >= 100) ids.add("xp100");
         if (maiorSequencia >= 7) ids.add("sequencia7");
         if (questoesRespondidas >= 100) ids.add("questoes100");
+        if (redacoes >= 1) ids.add("primeiraRedacao");
         return ids;
     }
 

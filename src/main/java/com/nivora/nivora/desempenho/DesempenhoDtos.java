@@ -22,7 +22,7 @@ public final class DesempenhoDtos {
     public record Gamificacao(int xp, int nivel, int xpNoNivel, List<String> conquistas) {
     }
 
-    public record DesempenhoResponse(int respondidas, int acertos, int percentual, int sequenciaDias,
+    public record DesempenhoResponse(int respondidas, int acertos, int percentual, int sequenciaDias, int redacoes,
                                      List<AreaDesempenho> porArea, List<AssuntoDesempenho> porAssunto,
                                      List<DiaDesempenho> ultimosDias, AssuntoDesempenho assuntoMaisFraco,
                                      Gamificacao gamificacao) {
