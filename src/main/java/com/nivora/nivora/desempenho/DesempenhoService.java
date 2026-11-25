@@ -91,7 +91,7 @@ public class DesempenhoService {
                         percentual(e.getValue()[1], e.getValue()[0]))));
 
         int qtdRedacoes = (int) redacoesRepo.countByUsuarioId(usuario.getId());
-        int xp = calculadora.xp(acertos, qtdRedacoes);
+        int xp = calculadora.xp((int) respostas.questoesDistintasAcertadas(usuario.getId()), qtdRedacoes);
         Gamificacao gam = new Gamificacao(xp, calculadora.nivel(xp), calculadora.xpNoNivel(xp),
                 calculadora.conquistas(xp, calculadora.maiorSequencia(dias), total, qtdRedacoes));
 

@@ -24,9 +24,9 @@
   app.innerHTML = `
     <h1 class="section-title">Conheça seu objetivo</h1>
     <div class="resultado-card">
-      <p>🎓 <strong>Curso:</strong> ${perfil.curso.nome}</p>
-      <p>🏫 <strong>Faculdade:</strong> ${perfil.faculdade.nome}</p>
-      <p>🎯 <strong>Forma de ingresso:</strong> ${perfil.ingresso}</p>
+      <p>🎓 <strong>Curso:</strong> ${NivoraApi.escapar(perfil.curso.nome)}</p>
+      <p>🏫 <strong>Faculdade:</strong> ${NivoraApi.escapar(perfil.faculdade.nome)}</p>
+      <p>🎯 <strong>Forma de ingresso:</strong> ${NivoraApi.escapar(perfil.ingresso)}</p>
     </div>
 
     <div class="assunto-lista" style="margin-top:20px;">

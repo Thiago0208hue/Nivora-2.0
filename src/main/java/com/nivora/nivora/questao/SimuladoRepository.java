@@ -6,6 +6,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface SimuladoRepository extends JpaRepository<Simulado, Long> {
 
+    long countByFinalizadoEmIsNotNull();
+
     Optional<Simulado> findByIdAndUsuarioId(Long id, Long usuarioId);
 
     List<Simulado> findTop20ByUsuarioIdOrderByIdDesc(Long usuarioId);

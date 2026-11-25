@@ -1,5 +1,6 @@
 package com.nivora.nivora.usuario;
 
+import com.nivora.nivora.config.NegocioException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -27,9 +28,11 @@ public class AuthController {
     private final UsuarioService usuarios;
     private final AuthenticationManager authenticationManager;
     private final SecurityContextRepository contextoRepository;
+    private final LimitadorDeTentativas limitador;
 
     public AuthController(UsuarioService usuarios, AuthenticationManager authenticationManager,
-                          SecurityContextRepository contextoRepository) {
+                          SecurityContextRepository contextoRepository, LimitadorDeTentativas limitador) {
+        this.limitador = limitador;
         this.usuarios = usuarios;
         this.authenticationManager = authenticationManager;
         this.contextoRepository = contextoRepository;
@@ -51,8 +54,21 @@ public class AuthController {
     public UsuarioResponse login(@Valid @RequestBody LoginRequest pedido,
                                  HttpServletRequest request, HttpServletResponse response) {
         String email = pedido.email().trim().toLowerCase();
-        Authentication autenticacao = authenticationManager.authenticate(
-                UsernamePasswordAuthenticationToken.unauthenticated(email, pedido.senha()));
+        // A chave junta e-mail e IP: barra tentativas em massa sem deixar um atacante trancar a conta de outra pessoa de qualquer lugar
+        String chave = email + "|" + request.getRemoteAddr();
+        if (limitador.bloqueado(chave)) {
+            throw new NegocioException(HttpStatus.TOO_MANY_REQUESTS,
+                    "Muitas tentativas de login. Aguarde alguns minutos e tente novamente.");
+        }
+        Authentication autenticacao;
+        try {
+            autenticacao = authenticationManager.authenticate(
+                    UsernamePasswordAuthenticationToken.unauthenticated(email, pedido.senha()));
+        } catch (org.springframework.security.core.AuthenticationException e) {
+            limitador.registrarFalha(chave);
+            throw e;
+        }
+        limitador.limpar(chave);
 
         // Protege contra fixação de sessão: troca o id de uma sessão já existente
         if (request.getSession(false) != null) {

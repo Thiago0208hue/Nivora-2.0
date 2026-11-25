@@ -46,6 +46,22 @@ public class SecurityConfig {
                     .requestMatchers("/api/admin/**").hasRole("ADMIN")
                     .requestMatchers("/api/**").authenticated()
                     .anyRequest().permitAll())
+            // Cabeçalhos de segurança: CSP impede scripts de outros sites (defesa extra contra XSS)
+            .headers(h -> h
+                    .contentSecurityPolicy(c -> c.policyDirectives(String.join("; ",
+                            "default-src 'self'",
+                            "script-src 'self'",
+                            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+                            "font-src 'self' https://fonts.gstatic.com",
+                            "img-src 'self' data:",
+                            "connect-src 'self'",
+                            "object-src 'none'",
+                            "base-uri 'self'",
+                            "form-action 'self'",
+                            "frame-ancestors 'none'")))
+                    .referrerPolicy(r -> r.policy(
+                            org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy.SAME_ORIGIN))
+                    .frameOptions(f -> f.deny()))
             // API devolve 401 em vez de redirecionar para uma página de login
             .exceptionHandling(e -> e.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
             .logout(l -> l

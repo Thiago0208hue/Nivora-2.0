@@ -71,6 +71,16 @@ public interface RespostaQuestaoRepository extends JpaRepository<RespostaQuestao
             """)
     List<Long> idsComUltimoErro(@Param("usuarioId") Long usuarioId, Pageable limite);
 
+    /** Quantas questões diferentes o estudante já acertou ao menos uma vez (base do XP, evita repetir a mesma questão). */
+    @Query("select count(distinct r.questao.id) from RespostaQuestao r where r.usuario.id = :usuarioId and r.correta = true")
+    long questoesDistintasAcertadas(@Param("usuarioId") Long usuarioId);
+
+    long countByCorretaTrue();
+
+    /** Estudantes diferentes que responderam ao menos uma questão desde a data (só a contagem, sem identificar ninguém). */
+    @Query("select count(distinct r.usuario.id) from RespostaQuestao r where r.respondidaEm >= :desde")
+    long estudantesAtivosDesde(@Param("desde") LocalDateTime desde);
+
     Optional<RespostaQuestao> findFirstByUsuarioIdAndQuestaoIdOrderByIdDesc(Long usuarioId, Long questaoId);
 
     List<RespostaQuestao> findByUsuarioIdOrderByIdDesc(Long usuarioId, Pageable limite);

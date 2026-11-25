@@ -35,27 +35,7 @@
 <script src="/js/storage.js"></script>
 <script src="/js/data.js"></script>
 <script src="/js/app.js"></script>
-<script>
-  (async function () {
-    await NivoraData.carregar();
-    const grid = document.getElementById('grid');
-    function render(itens) {
-      grid.innerHTML = itens.map(c => {
-        const areas = Object.entries(c.pesos).sort((a, b) => b[1] - a[1]).slice(0, 2)
-          .map(([k]) => ({matematica:'Matemática',natureza:'Natureza',redacao:'Redação',linguagens:'Linguagens',humanas:'Humanas'}[k]));
-        return `<div class="curso-card">
-          <h3>${c.nome}</h3>
-          <p class="hint">Prioridades: ${areas.join(' e ')}</p>
-          <a href="/pages/onboarding.html" class="btn btn-outline btn-sm">Montar plano para este curso</a>
-        </div>`;
-      }).join('');
-    }
-    render(NivoraData.cursos);
-    document.getElementById('buscaCurso').addEventListener('input', e => {
-      const termo = e.target.value.toLowerCase();
-      render(NivoraData.cursos.filter(c => c.nome.toLowerCase().includes(termo)));
-    });
-  })();
-</script>
+<script src="/js/api.js"></script>
+<script src="/js/cursos.js"></script>
 </body>
 </html>

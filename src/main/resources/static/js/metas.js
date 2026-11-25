@@ -19,7 +19,7 @@
     const perc = Math.min(100, Math.round((atual / alvo) * 100));
     return `
       <div class="assunto-item">
-        <div class="assunto-item-topo"><span>${texto}</span><span class="hint">${atual}/${alvo}${perc >= 100 ? ' ✅' : ''}</span></div>
+        <div class="assunto-item-topo"><span>${NivoraApi.escapar(texto)}</span><span class="hint">${atual}/${alvo}${perc >= 100 ? ' ✅' : ''}</span></div>
         <div class="mini-bar"><div class="mini-bar-fill" style="width:${perc}%"></div></div>
         ${extra}
       </div>`;

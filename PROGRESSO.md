@@ -1,12 +1,39 @@
 # PROGRESSO — Nivora 2.0
 
 ## Etapa atual
-Etapa 9 — Redação (**escrita, NÃO testada**; Etapas 2–8 também aguardam `./mvnw test`).
+Etapa 11 — Preparação do TCC (documentação + métricas; **código Java NÃO testado**; Etapas 2–10 aguardam `./mvnw test`).
 
 ## Concluídas
 - Etapa 0 — Auditoria (doc "Nivora 2.0 — Etapa 0: Diagnóstico").
 - Etapa 1 — Preparação do backend (validada pelo usuário: `./mvnw test`).
-- Etapas 2 a 8 — escritas, aguardando teste do usuário.
+- Etapas 2 a 10 — escritas, aguardando teste do usuário.
+
+## Etapa 11: alterações
+- `README.md` (execução, variáveis de ambiente, virar ADMIN) e `docs/`: `ARQUITETURA.md`, `API.md`, `BANCO.md` (diagrama Mermaid), `AVALIACAO.md` (DSR, SUS, pré/pós-teste, métricas, LGPD).
+- Instrumentação: `GET /api/admin/metricas` (ADMIN) devolve só totais (usuários, onboarding, ativos em 7 dias, questões respondidas, % de acerto, simulados, redações). Nenhum rastreamento novo foi criado. Teste: `MetricasApiTest` (não executado).
+- `docs/pesquisa/calcular_sus.py`: cálculo do SUS. **Executado** com `exemplo_sus.csv` (dados fictícios): deu 100, 50 e 0 nos três casos extremos, como esperado.
+- O texto dos itens do SUS é tradução de trabalho: usar a versão em português validada indicada pela orientação e citar a fonte.
+- Questionário e testes ficam fora do sistema (formulário externo/papel), pareados por código de participante.
+- Documentos descrevem o desenho da pesquisa; aprovação do comitê de ética e TCLE são do pesquisador, não foram feitos aqui.
+- Os diagramas Mermaid e as tabelas de API foram escritos à mão a partir do código; conferir após a primeira execução.
+
+## Etapa 10: revisão de segurança (não testada)
+Achados e correções:
+- **Cabeçalhos:** CSP (scripts só do próprio site, sem inline), X-Frame-Options DENY, nosniff, Referrer-Policy same-origin. O script inline de `cursos.html` foi movido para `js/cursos.js` por causa da CSP.
+- **XSS:** auditadas as 39 gravações em `innerHTML`; escapados `metas.js` (meta digitada pelo usuário), `objetivo.js` e `onboarding.js`. Os demais já escapavam ou usam texto fixo.
+- **Login:** `LimitadorDeTentativas` (5 falhas por e-mail+IP em 15 min → 429); mensagem única para e-mail inexistente ou senha errada; tamanho máximo nos campos do login.
+- **Erros:** `TratadorDeErros` agora cobre tipo de parâmetro (400), método (405), rota inexistente (404), tipo de conteúdo (415), acesso negado (403) e um último recurso (500 genérico, detalhes só no log).
+- **Integridade:** XP passa a contar questões DIFERENTES acertadas (repetir a mesma não infla). Desempenho enviado pelo navegador já era ignorado (Etapa 8).
+- **Produção:** `application-prod.properties` (cookie `secure`, erros sem detalhes). Ativar com `SPRING_PROFILES_ACTIVE=prod`, só com HTTPS.
+- Testes: `SegurancaApiTest` (integração), `LimitadorDeTentativasTest` (puro). Algoritmos de personalização, plano e desempenho já têm testes das Etapas 4, 5, 6 e 8.
+Riscos que continuam:
+- Limitador de login fica na memória (some ao reiniciar; não serve para várias instâncias). Atrás de proxy, `getRemoteAddr` seria o IP do proxy: configurar `server.forward-headers-strategy` na Etapa 12.
+- Cadastro revela se um e-mail já existe (409). Aceito por ora; avaliar na Etapa 11.
+- XP de redação não tem teto (cada redação salva dá 10 XP).
+- Páginas HTML são servidas sem login (só o JS redireciona); os dados estão protegidos na API.
+- CSP ainda permite estilos inline e Google Fonts (a hospedar localmente; LGPD).
+- Sem exclusão de conta/redações (LGPD) e sem papel ADMIN com tela.
+- Nada disto foi executado: falta rodar `./mvnw test`.
 
 ## Etapa 9: alterações (não testadas)
 - `V6__redacao.sql`: `tema_redacao` (5 temas do protótipo, origem EXEMPLO: não afirmamos que sejam oficiais) e `redacao`.

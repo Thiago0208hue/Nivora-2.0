@@ -163,7 +163,7 @@
       <p>🎓 <strong>Curso:</strong> ${esc(state.curso.nome)}</p>
       <p>🏫 <strong>Faculdade:</strong> ${esc(state.faculdade.nome)}</p>
       <p>🎯 <strong>Forma de ingresso:</strong> ${esc(state.ingresso)}</p>
-      <p>⏱️ <strong>Tempo diário:</strong> ${state.tempoEstudo}</p>
+      <p>⏱️ <strong>Tempo diário:</strong> ${esc(state.tempoEstudo)}</p>
       <p>📈 <strong>Nível:</strong> ${state.nivel}</p>
     `;
     const ordem = Object.values(recomendacao.prioridades).sort((a, b) => b.score - a.score);
